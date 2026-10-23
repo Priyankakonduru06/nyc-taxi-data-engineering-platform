@@ -1,0 +1,10 @@
+# Do not upload raw taxi data
+data/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Environment and secret files
+.env
+.venv/
