@@ -50,6 +50,8 @@
 
 \- No exact duplicate rows were detected by the initial duplicate-row check.
 
+\- An exploratory filter identified 8,608 records with zero or negative trip distance, fare amounts of at least $40, and trip durations under one minute. These records require further investigation; they have not been classified as invalid or deleted.
+
 
 
 \### 4. Important Decision
@@ -67,6 +69,74 @@ These findings are preliminary. No records have been deleted or modified. Furthe
 \- Build a repeatable validation process.
 
 \- Preserve the original source data.
+
+
+
+
+
+\### 6. Pipeline Implementation
+
+
+
+The `src/process\_data.py` script reads the original January 2026 Yellow Taxi Parquet dataset, applies data-quality flags, and saves the transformed dataset to the `processed/` directory.
+
+
+
+\#### Quality Rules Implemented
+
+
+
+| Quality Rule | Condition | Flag |
+
+|---|---|---|
+
+| Distance check | `trip\_distance <= 0` | `REVIEW` |
+
+| Distance check | `trip\_distance > 0` | `PASS` |
+
+| Fare check | `fare\_amount < 0` | `REVIEW` |
+
+| Fare check | `fare\_amount >= 0` | `PASS` |
+
+
+
+\#### Pipeline Results
+
+
+
+| Metric | Records |
+
+|---|---:|
+
+| Total records processed | 3,724,889 |
+
+| Distance flagged for review | 125,738 |
+
+| Distance passing the check | 3,599,151 |
+
+| Negative fares flagged for review | 39,463 |
+
+| Fares passing the check | 3,685,426 |
+
+
+
+The output contains the original 20 columns and two additional columns:
+
+\- `distance\_quality\_flag`
+
+\- `fare\_quality\_flag`
+
+
+
+All source records are retained. Records flagged for review are not automatically deleted because unusual values may represent legitimate business exceptions.
+
+
+
+\#### Limitations
+
+
+
+These checks cover only trip distance and fare amount. A `PASS` result does not guarantee that a record is valid across every data-quality dimension. Additional validation rules and business requirements are needed.
 
 
 

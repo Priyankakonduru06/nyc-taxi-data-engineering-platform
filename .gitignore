@@ -8,3 +8,5 @@ __pycache__/
 # Environment and secret files
 .env
 .venv/
+# Generated processed datasets
+processed/
