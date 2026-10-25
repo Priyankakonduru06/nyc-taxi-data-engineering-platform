@@ -10,3 +10,6 @@ __pycache__/
 .venv/
 # Generated processed datasets
 processed/
+
+# Generated analytics reports
+reports/

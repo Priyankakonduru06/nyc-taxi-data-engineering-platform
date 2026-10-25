@@ -140,5 +140,59 @@ These checks cover only trip distance and fare amount. A `PASS` result does not 
 
 
 
+\## 4. Daily Business Analytics
+
+
+
+\### Objective
+
+Generate a daily summary of NYC yellow taxi activity for January 2026 using the processed dataset.
+
+
+
+\### Metrics
+
+\- Total trips per day
+
+\- Total fare amount per day
+
+\- Average fare amount per day
+
+\- Average trip distance per day
+
+
+
+\### Reporting Period Validation
+
+The processed dataset contains 3,724,889 records. Pickup timestamps were checked against the January 2026 reporting period.
+
+
+
+\- Records before January 1, 2026: 6
+
+\- Records during January 2026: 3,724,882
+
+\- Records on or after February 1, 2026: 1
+
+
+
+The analytics script filters records to January 1 through January 31, 2026, using an exclusive February 1 end boundary. This ensures that only January pickups appear in the daily report.
+
+
+
+\### Output
+
+The script generates `reports/daily\_trip\_summary.csv`, containing 31 daily summaries.
+
+
+
+\### Data Handling
+
+Records outside the reporting period are excluded from this monthly report only. They remain in the processed dataset. The pipeline preserves source records rather than silently deleting data.
+
+
+
+
+
 
 
