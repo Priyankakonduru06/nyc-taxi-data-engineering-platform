@@ -1,17 +1,13 @@
 
-
 import logging
 from pathlib import Path
 
 import pandas as pd
 
 
-# Define input and output locations
 INPUT_FILE = Path("data/yellow_tripdata_2026-01.parquet")
 OUTPUT_FILE = Path("processed/yellow_tripdata_2026-01.parquet")
 
-
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s",
@@ -31,19 +27,20 @@ def create_fare_quality_flag(fares):
 
 
 def main():
-    """Load, validate, and save the NYC Taxi dataset."""
+    """Load, validate, process, and reconcile the taxi dataset."""
     logger.info("Starting NYC Taxi data pipeline")
 
     try:
-        # Step 1: Check that the input file exists
+        # Step 1: Check that the source file exists
         if not INPUT_FILE.exists():
             raise FileNotFoundError(
                 f"Input dataset not found: {INPUT_FILE}"
             )
 
-        # Step 2: Load the original dataset
+        # Step 2: Load the source dataset
         df = pd.read_parquet(INPUT_FILE)
-        logger.info("Source records loaded: %s", len(df))
+        source_count = len(df)
+        logger.info("Source records loaded: %s", source_count)
 
         # Step 3: Apply data quality rules
         df["distance_quality_flag"] = create_distance_quality_flag(
@@ -58,8 +55,29 @@ def main():
 
         # Step 5: Save the processed dataset
         df.to_parquet(OUTPUT_FILE, index=False)
+        logger.info("Processed dataset written to: %s", OUTPUT_FILE)
 
-        # Step 6: Log quality-check results
+        # Step 6: Read the saved output and reconcile record counts
+        output_df = pd.read_parquet(OUTPUT_FILE)
+        output_count = len(output_df)
+
+        logger.info("Source record count: %s", source_count)
+        logger.info("Output record count: %s", output_count)
+
+        if source_count != output_count:
+            raise ValueError(
+                f"Record reconciliation failed: source={source_count}, "
+                f"output={output_count}"
+            )
+
+        logger.info(
+            "Record reconciliation passed: %s source records match "
+            "the %s output records",
+            source_count,
+            output_count,
+        )
+
+        # Step 7: Log data quality results
         logger.info(
             "Records flagged for distance review: %s",
             (df["distance_quality_flag"] == "REVIEW").sum(),
@@ -77,8 +95,6 @@ def main():
             (df["fare_quality_flag"] == "PASS").sum(),
         )
 
-        logger.info("Processed records saved: %s", len(df))
-        logger.info("Output file: %s", OUTPUT_FILE)
         logger.info("Pipeline completed successfully")
 
     except Exception:
